@@ -1,0 +1,3 @@
+81.0,     Comida,     leche
+601.0,     Universidad,     libro 
+600.0,    Transporte,    Viaje CDMX
