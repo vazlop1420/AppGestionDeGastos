@@ -1,12 +1,29 @@
 package app.gastos;
-
+import java.time.LocalDate;
 
 	public class Gasto {
 	private double monto;
 	private String categoria;
+	private LocalDate date;
 	private String descripcion;
 	
 	
+	public String aTextoArchivo() {
+		return monto + "," + categoria + "," + descripcion + "," + date;
+	}
+	
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
 
 
 	public String getCategoria() {
@@ -48,10 +65,11 @@ package app.gastos;
 
 
 
-	public Gasto(double monto, String categoria, String descripcion) {
+	public Gasto(double monto, String categoria, String descripcion, LocalDate date) {
 		this.monto= monto;
 		this.categoria = categoria;
 		this.descripcion = descripcion;
+		this.date = date;
 		
 	}
 

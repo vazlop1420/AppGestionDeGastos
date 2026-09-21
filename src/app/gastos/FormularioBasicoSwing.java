@@ -7,17 +7,21 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+
 
 
 
@@ -32,13 +36,15 @@ public class FormularioBasicoSwing extends JFrame{
 	
 	  
 	public FormularioBasicoSwing() {
-		super("Registro de Datos");
-		setLayout(new FlowLayout());
+		super("App Gestor de Gastos");
+		
 		
 		
 		//CARGAR LOS DATOS GUARDADOS
 		gestor.cargarArchivo();
 		
+		//ESQUELETO DE LA VENTANA
+		setLayout(new BorderLayout());
 		
 		//COMPONENTES MONTO
 		JLabel labelMonto = new JLabel("Monto ($");
@@ -63,16 +69,59 @@ public class FormularioBasicoSwing extends JFrame{
 		labelTotal.setText(String.format("Total Gastado : $ %.2f", gestor.TotalGasto()));
 		
 		
+		
+		//PARTE DE ARRIBA 
+		
+		JPanel panelFormulario = new JPanel(new GridLayout(4,2,8,8));
+		panelFormulario.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(	10, 10, 10, 10)));
+		
+		panelFormulario.add(labelMonto);
+        panelFormulario.add(txtMonto);
+        panelFormulario.add(labelCategoria);
+        panelFormulario.add(comboCategoria);
+        panelFormulario.add(labelDescrip);
+        panelFormulario.add(txtDescrip);
+        panelFormulario.add(new JLabel("")); // Espacio vacío para alinear el botón
+        panelFormulario.add(botonEnviar);
+
+        add(panelFormulario, BorderLayout.NORTH);
+		
+		//CENTRO DEL PANEL
 		//JTABLE
-		String[]columnas = {"Monto", "Categoria", "Descripcion"};
-		modeloTabla = new DefaultTableModel(columnas,0);
-		tablaGastos = new JTable ( modeloTabla);
-		
-		//SCROLL TABLA
-		JScrollPane scrollTabla = new JScrollPane(tablaGastos);
-		scrollTabla.setPreferredSize(new Dimension(300,300));
-		
-		actualizarTabla();
+        String[] columnas = {"Monto", "Categoría", "Descripción", "Fecha"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Buena práctica UX: evitar edición directa
+            }
+        };
+
+        tablaGastos = new JTable(modeloTabla);
+        tablaGastos.setRowHeight(25);
+        tablaGastos.setFont(new Font("SansSerif", Font.PLAIN, 12));
+
+        // Alineación a la derecha para la columna del Monto
+        DefaultTableCellRenderer alineacionDerecha = new DefaultTableCellRenderer();
+        alineacionDerecha.setHorizontalAlignment(SwingConstants.RIGHT);
+        tablaGastos.getColumnModel().getColumn(0).setCellRenderer(alineacionDerecha);
+
+        JScrollPane scrollTabla = new JScrollPane(tablaGastos);
+        scrollTabla.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        add(scrollTabla, BorderLayout.CENTER);
+
+        // -------------------------------------------------------------
+        // PANEL INFERIOR (SOUTH): Acciones de la tabla y Total
+        // -------------------------------------------------------------
+        JPanel panelInferior = new JPanel(new BorderLayout());
+        panelInferior.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        panelInferior.add(botonEliminar, BorderLayout.WEST);
+        panelInferior.add(labelTotal, BorderLayout.EAST);
+
+        add(panelInferior, BorderLayout.SOUTH);
+
+        actualizarTabla();
 		
 		//CLICK "Borrar Gasto"
 		botonEliminar.addActionListener(new ActionListener() {
@@ -102,14 +151,16 @@ public class FormularioBasicoSwing extends JFrame{
 					
 					
 					
-					Gasto nuevoGasto = new Gasto(montoRedondeado,categoria,descripcion);
+					Gasto nuevoGasto = new Gasto(montoRedondeado,categoria,descripcion, LocalDate.now());
 					gestor.agregarGasto(nuevoGasto);
 					actualizarTabla();
+					
 					
 					labelTotal.setText("Total Gastado:" + gestor.TotalGasto());
 					
 					txtMonto.setText("");
 					txtDescrip.setText("");
+					
 					
 					}catch (NumberFormatException ex){
 					JOptionPane.showMessageDialog(null, "Ingresa un valor valido en el monto", "Error", JOptionPane.ERROR_MESSAGE);
@@ -119,20 +170,11 @@ public class FormularioBasicoSwing extends JFrame{
 				}
 			}
 		});
-			add(labelMonto);
-			add(txtMonto);
-			add(labelCategoria);
-			add(comboCategoria);
-			add(labelDescrip);
-			add(txtDescrip);
-			add(botonEnviar);
-			add(labelTotal);
-			add(scrollTabla);
-			add(botonEliminar);
+			
 			
 			
 
-			setSize(340,500);
+			setSize(400,500);
 			setLocationRelativeTo(null);
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setVisible(true);
@@ -150,7 +192,7 @@ public class FormularioBasicoSwing extends JFrame{
 					
 					
 					String montoFormateado = String.format("$%.2f", g.getMonto());
-					Object []fila = {montoFormateado,g.getCategoria(),g.getDescripcion()};
+					Object []fila = {montoFormateado,g.getCategoria(),g.getDescripcion(), g.getDate()};
 					modeloTabla.addRow(fila);
 					
 				}

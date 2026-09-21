@@ -1,6 +1,7 @@
 package app.gastos;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -20,10 +21,10 @@ public class GestorGastos {
 	}
 	//METODO PARA GUARDAR LOS DATOS EN UN ARCHIVO AL DARLE GUARDAR GASTO 
 	public void guardarEnArchivo() {
-		try( BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO))) {
+		try( PrintWriter writer = new PrintWriter(new FileWriter(ARCHIVO))) {
 			for(Gasto g : listaGastos) {
-				writer.write(g.getMonto() + ", " + g.getCategoria() + ", " + g.getDescripcion());
-				writer.newLine();
+				writer.write(g.aTextoArchivo());
+				writer.println();
 			}
 		}catch(IOException e ) {
 			System.out.println("Error al guardar el archivo" + e.getMessage());
@@ -31,6 +32,8 @@ public class GestorGastos {
 	}
 	
 	public void cargarArchivo() {
+		
+		
 		File file = new File(ARCHIVO);
 		if(!file.exists()) return;
 		
@@ -38,15 +41,17 @@ public class GestorGastos {
 			String linea;
 			
 			
-			
 			while (( linea = reader.readLine()) != null) {
 				String [] datos = linea.split(",");
-				if(datos.length == 3) {
+				if(datos.length == 4) {
 					double monto = Double.parseDouble(datos[0]);
 					String categoria = datos[1];
 					String descripcion = datos[2];
+					LocalDate fecha = LocalDate.parse(datos[3]);
 					
-					listaGastos.add(new Gasto(monto,categoria,descripcion));
+					
+					
+					listaGastos.add(new Gasto(monto,categoria,descripcion, fecha));
 				}
 			}
 		}catch (IOException e ) {
